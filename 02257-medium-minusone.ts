@@ -2,13 +2,13 @@
 import type { Equal, Expect } from './test-utils'
 
 type cases = [
-  Expect<Equal<MinusOne<1>, '0'>>,
-  Expect<Equal<MinusOne<55>, '54'>>,
-  Expect<Equal<MinusOne<3>, '2'>>,
-  Expect<Equal<MinusOne<100>, '99'>>,
-  Expect<Equal<MinusOne<1101>, '1100'>>,
+  Expect<Equal<MinusOne<1>, 0>>,
+  Expect<Equal<MinusOne<55>, 54>>,
+  Expect<Equal<MinusOne<3>, 2>>,
+  Expect<Equal<MinusOne<100>, 99>>,
+  Expect<Equal<MinusOne<1101>, 1100>>,
   Expect<Equal<MinusOne<0>, -1>>,
-  // Expect<Equal<MinusOne<9_007_199_254_740_992>, 9_007_199_254_740_991>>,
+  Expect<Equal<MinusOne<9_007_199_254_740_992>, 9_007_199_254_740_991>>,
 ]
 
 
@@ -36,7 +36,7 @@ type StringArrToString<T extends unknown[], S extends string = ''> =
 
 type ToNumber<T extends string> = T extends `${infer U extends number}` ? U : never
 
-type MinusOne<T extends number> = T extends 1 ? '0' : T extends 0 ? -1 : StringArrToString<ClearPreZero<RevertArr<MinusStringArr< StringToRevertArr<NumberToString<T>>>>>>
+type MinusOne<T extends number> = T extends 1 ? 0 : T extends 0 ? -1 : ToNumber<StringArrToString<ClearPreZero<RevertArr<MinusStringArr< StringToRevertArr<NumberToString<T>>>>>>>
 
 
 
