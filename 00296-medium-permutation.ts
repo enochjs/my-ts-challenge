@@ -30,10 +30,4 @@ type cases = [
 ]
 
 // ============= Your Code Here =============
-type Permutation<T, U = T> = [T] extends [never]
-  ? []
-  : T extends U
-  ? [T, ...Permutation<Exclude<U, T>>]
-  : []
-
-type a = Permutation<'A'>
+type Permutation<T, U=T> = [T] extends [never] ? [] : T extends U ? [T, ...Permutation<Exclude<U, T>>] : never
