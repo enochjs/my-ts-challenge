@@ -13,7 +13,6 @@ type cases = [
 
 
 // ============= Your Code Here =============
-
 type MyEqual<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false
 type IsAny<T> = 0 extends 1 & T ? true : false
 type MyEqual1<X, Y> =
