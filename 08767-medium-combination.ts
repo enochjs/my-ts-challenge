@@ -8,4 +8,12 @@ type cases = [
 
 
 // ============= Your Code Here =============
-type Combination<T extends string[]> = any
+
+type Tuple2Union<T extends unknown[]> = T[number]
+
+type Permutation<T, R extends string = '', U = T> =
+  [T] extends [never] ? R : T extends U ? Permutation<Exclude<U, T>, R extends '' ? `${T extends string ? T : ''}` : `${R} ${T extends string ? T : ''}`> : 3 
+
+type PermutationAll<T, U = T> = T extends U ? Permutation<U> | PermutationAll<Exclude<U, T>> : never
+
+type Combination<T extends string[]> = PermutationAll<Tuple2Union<T>>
