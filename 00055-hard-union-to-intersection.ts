@@ -15,13 +15,30 @@ type cases = [
 // 逆变 contra-variant => intersection (交集)
 // Otherwise, the type inferred for V is never.
 
-type UnionToIntersection<T> = (T extends any ? (args: T) => any : never) extends (args: infer R) => any ? R : never
+type UnionToIntersection<T> = (T extends T ? (args: T) => any : never) extends (args: infer R) => any ? R : never
+
+// type aa1 = UnionToIntersection<'foo' | 42 | true>
+
+// type a1 = 1 | 2 | 3
+
+// type a = UnionToIntersection<a1>
+
+// '1' | '2' | '3'
+// type a2<T extends number> = 
+
+// type a3 = a2<a1>
+
+// (T extends any ? (args: T) => any : never) extends (args: infer R) => any ? R : never
+// (args: 1 | 2 | 3)
+
+// type aa = ((args: true) => any) | ((args: 42) => any) | ((args: "foo") => any)
+type aa = UnionToIntersection<'foo' | 42 | true>
 
 
 // 转为函数的参数
 type T1<T> = T extends any ? (x: T) => any : never
 
-// Distributive 分发 =>  ((x: true) => any) | ((x: 42) => any) | ((x: "foo") => any)
+// Distributive 分发 =>  ((x: true) => any) | ((x: 42) => any) | ((x: "foo") => any) extends (args: infer R) => any ? R : never
 type T2 = T1<'foo' | 42 | true>
 
 // 函数参数为逆变 => 'foo' & 42 & true => never
