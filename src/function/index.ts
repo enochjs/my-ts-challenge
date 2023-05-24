@@ -61,3 +61,14 @@ function combine<T>(...funcs: ((x: T) => void)[]): (x: T) => void {
 function animalFunc(x: Animal) {}
 function dogFunc(x: Dog) {}
 let combined = combine(animalFunc, dogFunc); // (x: Dog) => void
+
+
+interface Hello {
+  foo: () => void
+  bar(): void
+}
+
+interface Hello {
+  foo: (type: number) => void
+  bar(type: string) :void
+}
