@@ -15,6 +15,7 @@ type cases = [
 
 
 // ============= Your Code Here =============
-type IPromiseAll<T, R extends unknown[]=[]> =
-  T extends infer F ? F : never
-declare function PromiseAll<T>(values: T): IPromiseAll<T>
+// 咋说呢，有意思的现象，函数真的是五花八门，函数的入参，可以被处理成 readonly []
+declare function PromiseAll<T extends unknown[]>(values: readonly [...T]): Promise<{
+  - readonly [P in keyof T]: Awaited<T[P]>
+}>
