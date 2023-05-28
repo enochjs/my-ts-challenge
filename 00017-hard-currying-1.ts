@@ -41,3 +41,25 @@ declare function Currying1<T extends (...args: any) => any>(fn: T): ICurrying1<T
 const curried11 = Currying1((a: string, b: number, c: boolean) => true)
 // return true
 const curried0 = Currying((a: string, b: number, c: boolean) => true)
+
+const test1 = () => {
+  return 1
+}
+function wrapper1<F>(fn: F): F  {
+  return fn
+}
+
+function wrapper2<F extends (...args: any) => any>(fn: F): F  {
+  return fn
+}
+
+const r = wrapper1(() => {
+  return 1
+})
+const r2 = wrapper1(test1)
+const r3 = wrapper2(() => {
+  return 1
+})
+type a1 = ReturnType<typeof r>  // 1
+type a2 = ReturnType<typeof r2> // number
+type a3 = ReturnType<typeof r3>  // number
