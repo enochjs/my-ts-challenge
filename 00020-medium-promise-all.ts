@@ -16,7 +16,9 @@ type cases = [
 Promise.all
 
 // ============= Your Code Here =============
-declare function PromiseAll<T extends readonly unknown[]>(
+// the answer in typescript docs
+// https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-0.html#variadic-tuple-types
+declare function PromiseAll<T extends unknown[]>(
   values: readonly [...T],
 ): Promise<
   {
