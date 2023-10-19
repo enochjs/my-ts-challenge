@@ -29,3 +29,7 @@ export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) ex
 ) => void
   ? I
   : never
+
+export type Merge<T> = {
+  [P in keyof T]: T[P]
+}
