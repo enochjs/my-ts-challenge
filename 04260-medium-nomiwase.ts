@@ -12,8 +12,6 @@ type cases = [
 
 // ============= Your Code Here =============
 type StringToUnion<S extends string> = S extends `${infer U}${infer Rest}` ? U | StringToUnion<Rest> : never
-
-type AllCombinations<S extends string, U extends string = StringToUnion<S>> =
-  [U] extends [never]
-    ? ''
-    : '' | { [P in U] : `${P}${AllCombinations<Exclude<U, P>>}` }[U]
+type Permutation<T extends string, U extends string=T> = [T] extends [never] ? '' : T extends U ? `${T}${Permutation<Exclude<U, T>>}` : ''
+type PermutationComb<T extends string, U extends string=T> = (T extends U ? PermutationComb<Exclude<U, T>> : never) | Permutation<U>
+type AllCombinations<T extends string> = PermutationComb<StringToUnion<T>>
