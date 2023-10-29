@@ -16,4 +16,11 @@ type cases = [
 
 
 // ============= Your Code Here =============
-type DropString<S, R> = any
+
+type String2Union<S, R = never> = S extends `${infer F}${infer Rest}` ? String2Union<Rest, R | F> : R
+type DropString<S, R, U=String2Union<R>, N extends string = ''> =
+  S extends `${infer F extends string}${infer Rest}`
+    ? F extends U
+      ? DropString<Rest, R, U, N>
+      : DropString<Rest, R, U, `${N}${F}`>
+    : N
