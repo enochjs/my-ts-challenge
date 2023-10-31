@@ -132,23 +132,34 @@ type cases = [
 
 
 // ============= Your Code Here =============
-type FizzBuzz<N extends number, I extends number[] = [], F extends number[] = [], B extends number[] = [], R extends string[]=[]> =
-  I['length'] extends N
-    ? R
-    : FizzBuzz<
-        N,
-        [...I, 1],
-        F['length'] extends 3 ? [1] : [...F, 1],
-        B['length'] extends 5 ? [1] : [...B, 1],
-        [...R,
-          [...F, 1]['length'] extends 3
-            ? [...B, 1]['length'] extends 5
-              ? 'FizzBuzz'
-              : 'Fizz'
-            : [...B, 1]['length'] extends 5
-              ? 'Buzz'
-              : `${[...I, 1]['length']}`
-        ]
-      >
+type ConstructTuple<
+  T extends number,
+  N extends unknown[] = []
+> = N["length"] extends T ? N : ConstructTuple<T, [...N, unknown]>;
 
-    
+// 数学理论，所有位数总和 / 3 => 0 则能被3 整除
+type RemainderWhenDividedBy3<T, R extends 0 | 1 | 2 = 0 > =
+  T extends `${infer I}${0 | 3 | 6 | 9}`
+    ? RemainderWhenDividedBy3<I, R>
+      : T extends `${infer I}${1 | 4 | 7}`
+      ? RemainderWhenDividedBy3<I, [1, 2, 0][R]>
+      : T extends `${infer I}${2 | 5 | 8}`
+        ? RemainderWhenDividedBy3<I, [2, 0, 1][R]>
+        : R;
+
+type FizzBuzzOrNumber<T> = RemainderWhenDividedBy3<T> extends 0
+  ? T extends `${string}${"0" | "5"}`
+    ? "FizzBuzz"
+    : "Fizz"
+  : T extends `${string}${"0" | "5"}`
+    ? "Buzz"
+    : T;
+
+type FizzBuzz<
+  T extends number,
+  L extends unknown[] = [...ConstructTuple<T>, unknown]
+> = {
+  [K in keyof L]: FizzBuzzOrNumber<`${K}`>;
+} extends [unknown, ...infer I]
+  ? I
+  : never;
