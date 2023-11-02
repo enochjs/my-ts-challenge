@@ -1,5 +1,5 @@
 // ============= Test Cases =============
-import type { Equal, Expect } from './test-utils'
+import type { Equal, Expect, Merge } from './test-utils'
 
 type cases = [
   // Already distributed unions should stay the same:
@@ -84,4 +84,66 @@ type cases = [
 
 
 // ============= Your Code Here =============
-type DistributeUnions<T> = any
+
+// 1 | 2, 'a' | 'b'
+// [1, 'a'] | [1, 'b'] | [2, 'a'] | [2, 'b']
+// | [1, 'a', false]
+// | [1, 'a', true]
+// | [1, 'b', false]
+// | [1, 'b', true]
+// | [2, 'a', false]
+// | [2, 'a', true]
+// | [2, 'b', false]
+// | [2, 'b', true]
+// { x: 'a' | 'b'; y: 'c' | 'd' }
+
+
+
+// type DistributeUnionsObj<T, U extends keyof T = keyof T, R = never> = 
+
+// type aa = DistributeUnionsObj<{ x: 'a' | 'b'; y: 'c' | 'd' }>
+
+
+type Union2IntersectionFn<T> = (T extends T ? (X: () => T) => any : never) extends (args: infer R) => any ? R : never
+
+type GetLast<T> = T extends () => infer R ? R : never
+
+
+// type a = GetLast<Union2IntersectionFn<'a' | 'b' | 'c'>>
+
+type RecordUnion<T, E extends PropertyKey> = 
+  T extends T
+    ? Record<E, T>
+    : never
+
+type DistributeUnionsObj<T,  R = {}, K = GetLast<Union2IntersectionFn<keyof T>>> =
+  [K] extends [never] 
+    ? R
+    : K extends keyof T
+      ? DistributeUnionsObj<Omit<T, K>, R &  RecordUnion<T[K], K>>
+      : never
+
+type a = DistributeUnionsObj<{ x: 'a' | 'b'; y: 'c' | 'd' }>
+
+type b = {y: 'c'} | { y: 'd' }
+type c = { x: 'a' }
+
+type d = Merge<b & c>
+
+type DistributeUnionsArr<T, E> = 
+  E extends E
+    ? [T] extends [never]
+      ? [E]
+      : T extends any[]
+        ? [...T, E]
+        : [T, E]
+    : never
+
+// type  cc = [] extends {} ? 1 : 2
+
+type DistributeUnions<T, R = never> =
+  T extends any[]
+    ? T extends [infer F, ...infer Rest]
+      ? DistributeUnions<Rest, DistributeUnionsArr<R, F>>
+      : R
+    : T
