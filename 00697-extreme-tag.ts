@@ -163,12 +163,111 @@ type cases = [
 
 
 // ============= Your Code Here =============
-type GetTags<B> = any
+type IsNever<T> = [T] extends [never] ? true : false
+type IsAny<T> = 0 extends (1 & T) ? true : false
+type Is<T, K> = [T] extends [K] ? [K] extends [T] ? true : false : false
 
-type Tag<B, T extends string> = any
+type StartsWith<T extends any[], K extends any[]> = 
+  T extends [infer T0, ...infer Tr]
+  ? K extends [infer K0, ...infer Kr]
+    ? Is<T0, K0> extends true
+      ? StartsWith<Tr, Kr>
+      : false
+    : true
+  : [] extends K
+  ? true
+  : false
 
-type UnTag<B> = any
+type StartsWithTest = [
+  Expect<Equal<StartsWith<[2,0,2,1], [2,0]>, true>>,
+  Expect<Equal<StartsWith<[2,0,2,1], [2,1]>, false>>,
+  Expect<Equal<StartsWith<[2,0,2,1], [2]>, true>>,
+  Expect<Equal<StartsWith<[2,0,2,1], [2,0,2,1]>, true>>,
+  Expect<Equal<StartsWith<[2,0,2,1], [2,0,2,1,2]>, false>>,
+  Expect<Equal<StartsWith<[2,0,2,1], []>, true>>,
+]
 
-type HasTag<B, T extends string> = any
-type HasTags<B, T extends readonly string[]> = any
-type HasExactTags<B, T extends readonly string[]> = any
+
+type SuccessionWith<T extends any[], K extends any[]> = 
+  T extends [infer T0, ...infer Tr]
+  ? K extends [infer K0, ...infer Kr]
+    ? Is<T0, K0> extends true
+      ? StartsWith<Tr, Kr>
+      : SuccessionWith<Tr, K>
+    : [] extends K
+    ? true
+    : false
+  : false
+
+type SuccessionWithTest = [
+  Expect<Equal<SuccessionWith<[2,0,2,1], [1,2]>, false>>,
+  Expect<Equal<SuccessionWith<[2,0,2,1], [2,0]>, true>>,
+  Expect<Equal<SuccessionWith<[2,0,2,1], [2]>, true>>,
+  Expect<Equal<SuccessionWith<[2,0,2,1], [2,0,2,1]>, true>>,
+  Expect<Equal<SuccessionWith<[2,0,2,1], [1,2,0,2,1]>, false>>,
+  Expect<Equal<SuccessionWith<[2,0,2,1], []>, true>>,
+]
+
+/**
+ * Define tag container as function
+ */
+type Tags<T extends string[], B> = () => [T, B]
+
+/**
+ * Inject tags to any types except `null` and `undefined`.
+ * 
+ * `null | (null & Tags<T, null>)` wold be evaluated to `null`, so null cannot be labeled with tag(s), and `undefined` is the same.
+ */
+type SetTags<B, T extends string[]> =
+  IsNever<B> extends true
+  ? Tags<T, B>
+  : IsAny<B> extends true
+  ? Tags<T, B>
+  : Is<B, unknown> extends true
+  ? Tags<T, B>
+  : B | (B & Tags<T, B>)
+
+/**
+ * Extract original type which already labeled with tags.
+ * 
+ * If `B` is an Union Type, only labeled with tag type would be returned as Union Type.
+ */
+type GetTagged<B> = B extends Tags<infer _, infer T> ? T : never
+
+/**
+ * Get tag string tuple from type `B`.
+ * 
+ * If `B` is an Union Type which all members are labeled with tags, this type returns Union Type of tag tuples.
+ * When all members are labeled with exactly same tag(s), only one tuple will be retuned by Union Type's characteristics.
+ */
+type GetTagTupples<B> = 
+  IsNever<Exclude<B, GetTagged<B>>> extends true
+  ? IsNever<B> extends true
+    ? []
+    : IsAny<B> extends true
+    ? []
+    : B extends Tags<infer T, infer _>
+    ? T
+    : never
+  : B extends Tags<infer T, never>
+  ? T
+  : []
+
+
+type Tag<B, T extends string> = SetTags<UnTag<B>, [...GetTags<B>, T]>
+
+type UnTag<B> = B extends infer X ? X extends Tags<infer _, infer K> ? K : X : never
+
+/**
+ * Get tag string tuple from type `B`.
+ * 
+ * If `B` is an Union Type which all members are labeled with tags, this type returns Union Type of tag tuples.
+ * When all members are labeled with exactly same tag(s), only one tuple will be retuned by Union Type's characteristics.
+ */
+type GetTags<B> = GetTagTupples<Exclude<B, null | undefined>>
+
+type HasTag<B, T extends string> = HasTags<B, [T]>
+
+type HasTags<B, T extends readonly string[]> = SuccessionWith<GetTags<B>, [...T]> extends true ? true : false
+
+type HasExactTags<B, T extends readonly string[]> = Is<GetTags<B>, T>
