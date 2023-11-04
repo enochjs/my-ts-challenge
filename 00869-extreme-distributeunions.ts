@@ -84,66 +84,25 @@ type cases = [
 
 
 // ============= Your Code Here =============
+type HelperArr<V, T extends unknown[]> = V extends V ? [V, ...DistributeUnionsArr<T>] : never
 
-// 1 | 2, 'a' | 'b'
-// [1, 'a'] | [1, 'b'] | [2, 'a'] | [2, 'b']
-// | [1, 'a', false]
-// | [1, 'a', true]
-// | [1, 'b', false]
-// | [1, 'b', true]
-// | [2, 'a', false]
-// | [2, 'a', true]
-// | [2, 'b', false]
-// | [2, 'b', true]
-// { x: 'a' | 'b'; y: 'c' | 'd' }
+type DistributeUnionsArr<T extends unknown[]> =
+  T extends [infer F, ...infer Rest]
+    ? HelperArr<DistributeUnions<F>, Rest>
+    : []
 
+type HelpObj<K, V> = V extends V ? { [P in K & string]: V } : never
 
-
-// type DistributeUnionsObj<T, U extends keyof T = keyof T, R = never> = 
-
-// type aa = DistributeUnionsObj<{ x: 'a' | 'b'; y: 'c' | 'd' }>
-
-
-type Union2IntersectionFn<T> = (T extends T ? (X: () => T) => any : never) extends (args: infer R) => any ? R : never
-
-type GetLast<T> = T extends () => infer R ? R : never
-
-
-// type a = GetLast<Union2IntersectionFn<'a' | 'b' | 'c'>>
-
-type RecordUnion<T, E extends PropertyKey> = 
-  T extends T
-    ? Record<E, T>
-    : never
-
-type DistributeUnionsObj<T,  R = {}, K = GetLast<Union2IntersectionFn<keyof T>>> =
-  [K] extends [never] 
-    ? R
-    : K extends keyof T
-      ? DistributeUnionsObj<Omit<T, K>, R &  RecordUnion<T[K], K>>
+type DistributeUnionsObj<T extends object, K extends keyof T = keyof T> =
+  [K] extends [never]
+    ? {}
+    : K extends K 
+      ? HelpObj<K, DistributeUnions<T[K]>> & DistributeUnionsObj<Omit<T, K>>
       : never
 
-type a = DistributeUnionsObj<{ x: 'a' | 'b'; y: 'c' | 'd' }>
-
-type b = {y: 'c'} | { y: 'd' }
-type c = { x: 'a' }
-
-type d = Merge<b & c>
-
-type DistributeUnionsArr<T, E> = 
-  E extends E
-    ? [T] extends [never]
-      ? [E]
-      : T extends any[]
-        ? [...T, E]
-        : [T, E]
-    : never
-
-// type  cc = [] extends {} ? 1 : 2
-
-type DistributeUnions<T, R = never> =
-  T extends any[]
-    ? T extends [infer F, ...infer Rest]
-      ? DistributeUnions<Rest, DistributeUnionsArr<R, F>>
-      : R
-    : T
+type DistributeUnions<T> =
+  T extends unknown[]
+    ? DistributeUnionsArr<T>
+    : T extends object
+      ? Merge<DistributeUnionsObj<T>>
+      : T
